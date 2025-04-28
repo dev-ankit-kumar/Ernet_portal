@@ -1,262 +1,300 @@
 'use client';
 
 import React, { useState } from 'react';
+import html2canvas from 'html2canvas';
+import { useRef } from 'react';
+import { useRouter } from 'next/navigation';
+
+
+
+// Inside handleSubmit after successful API call
+
+
 
 interface FormData {
   username: string;
   state: string;
+  serviceType: string;
   plan: string;
   additionalResources: string;
   totalAmount: string;
   discount: string;
   piDate: string;
   invoiceDate: string;
+  address: string;
+  gstin: string;
+  numVMs: string;
 }
 
+const states = [
+  'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
+  'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand',
+  'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur',
+  'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab',
+  'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura',
+  'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
+  'Andaman and Nicobar Islands', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu',
+  'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry'
+];
+
+const servicePlanOptions: Record<string, string[]> = {
+    'Dedicated Web Hosting': [
+        'S-11 – 1 vCPU, 1 GB RAM, 70 GB Storage',
+        'S-14 – 1 vCPU, 4 GB RAM, 70 GB Storage',
+        'S-22 – 2 vCPU, 8 GB RAM, 70 GB Storage',
+        'S-28 – 2 vCPU, 8 GB RAM, 70 GB Storage',
+        'P-11 (WH-1) – 4 vCPU, 4 GB RAM, 100 GB Storage',
+        'P-14 – 4 vCPU, 16 GB RAM, 200 GB Storage',
+        'P-22 (WH-2) – 8 vCPU, 8 GB RAM, 100 GB Storage',
+        'P-28 – 8 vCPU, 32 GB RAM, 200 GB Storage',
+        'P-44 (WH-3) – 16 vCPU, 16 GB RAM, 250 GB Storage',
+        'P-48 – 16 vCPU, 32 GB RAM, 1000 GB Storage',
+        'P-88 (WH-5) – 32 vCPU, 32 GB RAM, 500 GB Storage',
+        'P-816 – 32 vCPU, 64 GB RAM, 1500 GB Storage'
+      ],
+  'Shared Web Hosting': ['SH-1 with Storage: 5GB, Data access: Unlimited, Application supported: Php / ASP.Net, Data base: MS SQL & Mariadb etc, Access: Through user application /SFTP',
+    'SH-2 with Storage: 10GB, Data access: Unlimited, Application supported: Php / ASP.Net, Data base: MS SQL & Mariadb etc, Access: Through user application /SFTP '
+  ],
+  
+};
+
 const SubscriptionForm: React.FC = () => {
+  const router = useRouter();
+
   const [formData, setFormData] = useState<FormData>({
     username: '',
     state: '',
-    plan: 'basic',
+    serviceType: '',
+    plan: '',
     additionalResources: '',
     totalAmount: '',
     discount: '0',
     piDate: '',
     invoiceDate: '',
+    address: '',
+    gstin: '',
+    numVMs: '',
   });
 
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const invoiceRef = useRef<HTMLDivElement>(null);
+
+
+  const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' | '' }>({
     text: '',
     type: '',
   });
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+      ...(name === 'serviceType' ? { plan: '' } : {}), // reset plan if serviceType changes
+    }));
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setMessage({ text: '', type: '' });
-
+  
     try {
-      const response = await fetch('http://localhost:5000/api/add-user', {
+      // 1) send to DB
+      const res = await fetch('http://localhost:5000/api/add-user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to submit form');
+  
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || 'Failed to submit');
       }
-
-      setMessage({ text: data.message || 'User added successfully!', type: 'success' });
-
-      // Auto-clear message after 3s
-      setTimeout(() => {
-        setMessage({ text: '', type: '' });
-      }, 3000);
-
-      // Reset form
-      setFormData({
-        username: '',
-        state: '',
-        plan: 'basic',
-        additionalResources: '',
-        totalAmount: '',
-        discount: '0',
-        piDate: '',
-        invoiceDate: '',
-      });
-    } catch (error) {
+  
+      // 2) show a quick success message (optional)
+      setMessage({ text: 'User added successfully!', type: 'success' });
+  
+      // 3) redirect to your new invoice page
+      router.push(`/invoice/${data.id}`);
+    } catch (err) {
       setMessage({
-        text: error instanceof Error ? error.message : 'An unexpected error occurred',
+        text: err instanceof Error ? err.message : 'An unexpected error occurred',
         type: 'error',
       });
     } finally {
       setIsLoading(false);
     }
   };
+  
+  // const generatePDF = async () => {
+  //   const element = invoiceRef.current;
+  //   if (!element) return;
+  
+  //   try {
+  //     const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+  //     const imgData = canvas.toDataURL('image/png');
+  //     const pdf = new jsPDF();
+  //     pdf.addImage(imgData, 'PNG', 10, 10, 190, 0);
+  //     pdf.save(`Proforma_Invoice_${formData.username}.pdf`);
+  //   } catch (err) {
+  //     console.error('PDF Generation Failed:', err);
+  //   }
+  // };
+  
 
-  const states = [
-    'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
-    'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand',
-    'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur',
-    'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab',
-    'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura',
-    'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
-    'Andaman and Nicobar Islands', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu',
-    'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry'
-  ];
+
+ 
+
+  const labelStyle = 'block text-sm font-medium text-gray-700 mb-1';
+  const inputStyle =
+    'w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-blue-400';
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
-      <div className="max-w-4xl w-full mx-auto bg-white rounded-lg shadow-md p-4">
-        <h2 className="text-xl font-bold text-gray-800 mb-3 text-center">Add New User</h2>
+    
+    <div className="bg-white p-6 md:p-8 shadow-md rounded-lg max-w-6xl mx-auto mt-10">
+      <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">Add New User</h2>
 
-        {message.text && (
-          <div className={`p-2 mb-3 rounded-md text-sm ${
-            message.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-          }`}>
-            {message.text}
-          </div>
-        )}
+      {message.text && (
+        <div
+          className={`p-3 mb-6 text-sm rounded-md ${
+            message.type === 'success'
+              ? 'bg-green-100 text-green-700'
+              : 'bg-red-100 text-red-700'
+          }`}
+        >
+          {message.text}
+        </div>
+      )}
 
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
-                Username
-              </label>
-              <input
-                id="username"
-                name="username"
-                type="text"
-                required
-                value={formData.username}
-                onChange={handleChange}
-                className="w-full px-2 py-1 border border-gray-300 rounded-md"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-1">
-                State
-              </label>
-              <select
-                id="state"
-                name="state"
-                required
-                value={formData.state}
-                onChange={handleChange}
-                className="w-full px-2 py-1 border border-gray-300 rounded-md"
-              >
-                <option value="">Select</option>
-                {states.map((state) => (
-                  <option key={state} value={state}>{state}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="plan" className="block text-sm font-medium text-gray-700 mb-1">
-                Plan
-              </label>
-              <select
-                id="plan"
-                name="plan"
-                required
-                value={formData.plan}
-                onChange={handleChange}
-                className="w-full px-2 py-1 border border-gray-300 rounded-md"
-              >
-                <option value="basic">Basic</option>
-                <option value="standard">Standard</option>
-                <option value="premium">Premium</option>
-                <option value="enterprise">Enterprise</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div>
-              <label htmlFor="totalAmount" className="block text-sm font-medium text-gray-700 mb-1">
-                Total Amount (₹)
-              </label>
-              <input
-                id="totalAmount"
-                name="totalAmount"
-                type="number"
-                required
-                min="0"
-                step="0.01"
-                value={formData.totalAmount}
-                onChange={handleChange}
-                className="w-full px-2 py-1 border border-gray-300 rounded-md"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="discount" className="block text-sm font-medium text-gray-700 mb-1">
-                Discount (%)
-              </label>
-              <input
-                id="discount"
-                name="discount"
-                type="number"
-                min="0"
-                max="100"
-                value={formData.discount}
-                onChange={handleChange}
-                className="w-full px-2 py-1 border border-gray-300 rounded-md"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label htmlFor="piDate" className="block text-sm font-medium text-gray-700 mb-1">
-                  PI Date
-                </label>
-                <input
-                  id="piDate"
-                  name="piDate"
-                  type="date"
-                  required
-                  value={formData.piDate}
-                  onChange={handleChange}
-                  className="w-full px-2 py-1 border border-gray-300 rounded-md"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="invoiceDate" className="block text-sm font-medium text-gray-700 mb-1">
-                  Invoice Date
-                </label>
-                <input
-                  id="invoiceDate"
-                  name="invoiceDate"
-                  type="date"
-                  required
-                  value={formData.invoiceDate}
-                  onChange={handleChange}
-                  className="w-full px-2 py-1 border border-gray-300 rounded-md"
-                />
-              </div>
-            </div>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Section 1: Basic Info */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <label className={labelStyle}>Username</label>
+            <input name="username" value={formData.username} onChange={handleChange} required className={inputStyle} />
           </div>
 
           <div>
-            <label htmlFor="additionalResources" className="block text-sm font-medium text-gray-700 mb-1">
-              Additional Resources
-            </label>
-            <textarea
-              id="additionalResources"
-              name="additionalResources"
-              rows={2}
-              value={formData.additionalResources}
-              onChange={handleChange}
-              className="w-full px-2 py-1 border border-gray-300 rounded-md"
-              placeholder="Enter any additional resources needed"
-            />
+            <label className={labelStyle}>State</label>
+            <select name="state" value={formData.state} onChange={handleChange} required className={inputStyle}>
+              <option value="">Select State</option>
+              {states.map((s) => (
+                <option key={s}>{s}</option>
+              ))}
+            </select>
           </div>
 
-          <div className="pt-2 flex justify-center">
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md disabled:opacity-50"
+          <div>
+            <label className={labelStyle}>Service Type</label>
+            <select
+              name="serviceType"
+              value={formData.serviceType}
+              onChange={handleChange}
+              required
+              className={inputStyle}
             >
-              {isLoading ? 'Submitting...' : 'Submit'}
-            </button>
+              <option value="">Select Service</option>
+              {Object.keys(servicePlanOptions).map((type) => (
+                <option key={type}>{type}</option>
+              ))}
+            </select>
           </div>
-        </form>
-      </div>
+        </div>
+
+        {/* Section 2: Plan & Details */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <label className={labelStyle}>Plan</label>
+            <select
+              name="plan"
+              value={formData.plan}
+              onChange={handleChange}
+              required
+              disabled={!formData.serviceType}
+              className={inputStyle}
+            >
+              <option value="">Select Plan</option>
+              {(servicePlanOptions[formData.serviceType] || []).map((plan) => (
+                <option key={plan}>{plan}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className={labelStyle}>GSTIN / UIN</label>
+            <input name="gstin" value={formData.gstin} onChange={handleChange} className={inputStyle} />
+          </div>
+
+          <div>
+            <label className={labelStyle}>Number of VMs</label>
+            <input
+              name="numVMs"
+              type="number"
+              value={formData.numVMs}
+              onChange={handleChange}
+              className={inputStyle}
+              placeholder="e.g. 5"
+            />
+          </div>
+        </div>
+
+        {/* Section 3: Address & Financials */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <label className={labelStyle}>Address</label>
+            <textarea name="address" value={formData.address} onChange={handleChange} rows={2} className={inputStyle} />
+          </div>
+
+          <div>
+            <label className={labelStyle}>Total Amount</label>
+            <input name="totalAmount" type="number" value={formData.totalAmount} onChange={handleChange} required className={inputStyle} />
+          </div>
+
+          <div>
+            <label className={labelStyle}>Discount (%)</label>
+            <input name="discount" type="number" value={formData.discount} onChange={handleChange} className={inputStyle} />
+          </div>
+        </div>
+
+        {/* Section 4: Dates */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className={labelStyle}>PI Date</label>
+            <input name="piDate" type="date" value={formData.piDate} onChange={handleChange} required className={inputStyle} />
+          </div>
+
+          <div>
+            <label className={labelStyle}>Invoice Date</label>
+            <input name="invoiceDate" type="date" value={formData.invoiceDate} onChange={handleChange} required className={inputStyle} />
+          </div>
+        </div>
+
+        {/* Additional Resources */}
+        <div>
+          <label className={labelStyle}>Additional Resources</label>
+          <textarea
+            name="additionalResources"
+            value={formData.additionalResources}
+            onChange={handleChange}
+            rows={2}
+            className={inputStyle}
+          />
+        </div>
+
+        <div className="text-center pt-4">
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded-md focus:outline-none transition"
+          >
+            {isLoading ? 'Submitting...' : 'Submit'}
+          </button>
+        </div>
+      </form>
+     
     </div>
   );
 };

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Bell, User, Users, Database, HardDrive, LogOut } from 'lucide-react';
+import { Bell, User, Users, Database, HardDrive, LogOut ,UserPlus ,Globe} from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -9,6 +9,8 @@ import Image from 'next/image';
 const HomePage: React.FC = () => {
   const [phone, setPhone] = useState<string | null>(null);
   const [userCount, setUserCount] = useState<number | null>(null);
+  const [vmCount, setVmCount] = useState<number | null>(null);
+
 
   const router = useRouter();
 
@@ -21,12 +23,19 @@ const HomePage: React.FC = () => {
       setPhone(storedPhone);
     }
   
-    // fetch user count
+    // Fetch user count
     fetch('http://localhost:5000/api/user-count')
       .then(res => res.json())
       .then(data => setUserCount(data.total))
       .catch(err => console.error('Error fetching user count:', err));
+  
+    // ✅ Fetch VM count
+    fetch('http://localhost:5000/api/vm-count')
+      .then(res => res.json())
+      .then(data => setVmCount(data.total))
+      .catch(err => console.error('Error fetching VM count:', err));
   }, []);
+  
   
 
   const handleLogout = () => {
@@ -55,21 +64,35 @@ const HomePage: React.FC = () => {
       color: 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100',
     },
     {
-      title: 'VM Details',
+      title: 'Add New VM',
       icon: <Database size={24} className="text-amber-600" />,
       description: 'Add new VM Details',
-      href: '/VM/new',
+      href: '/add-vm',
       color: 'bg-amber-50 border-amber-200 hover:bg-amber-100',
     },
     {
       title: 'Existing VM Details',
       icon: <HardDrive size={24} className="text-sky-600" />,
       description: 'View and manage existing VM Details',
-      href: '/VM',
+      href: '/view-vms',
       color: 'bg-sky-50 border-sky-200 hover:bg-sky-100',
     },
+    {
+      title: 'Add New Web Hosting User',
+      icon: <UserPlus size={24} className="text-purple-600" />,  // Assuming you're using lucide-react icons
+      description: 'Register a new web hosting user',
+      href: '/add-webhostingusers',
+      color: 'bg-purple-50 border-purple-200 hover:bg-purple-100',
+    },
+    {
+      title: 'Existing Web Hosting Users',
+      icon: <Globe size={24} className="text-pink-600" />,
+      description: 'Manage existing web hosting users',
+      href: '/existing-webhostingusers',
+      color: 'bg-pink-50 border-pink-200 hover:bg-pink-100',
+    },
   ];
-
+  
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Top Navigation Bar */}
@@ -163,7 +186,9 @@ const HomePage: React.FC = () => {
               </div>
               <div className="ml-4">
                 <h3 className="text-sm font-medium text-gray-500">Active VMs</h3>
-                <span className="text-2xl font-semibold text-gray-900">56</span>
+                <span className="text-2xl font-semibold text-gray-900">
+  {vmCount !== null ? vmCount : '...'}
+</span>
               </div>
             </div>
           </div>
@@ -175,7 +200,7 @@ const HomePage: React.FC = () => {
               </div>
               <div className="ml-4">
                 <h3 className="text-sm font-medium text-gray-500">Storage Used</h3>
-                <span className="text-2xl font-semibold text-gray-900">68%</span>
+                <span className="text-2xl font-semibold text-gray-900">0%</span>
               </div>
             </div>
           </div>
