@@ -1,16 +1,17 @@
-
 'use client'
 
 import React from 'react'
 import AddUserForm from '@/components/AddUserForm'
 import withAuth from '@/components/withAuth'
 
+const ProtectedAddUserForm = withAuth(AddUserForm)
+
 const page = () => {
   return (
     <div>
-      <AddUserForm/>
+      <ProtectedAddUserForm />
     </div>
   )
 }
 
-export default withAuth(page)
+export default page

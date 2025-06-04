@@ -18,7 +18,7 @@ interface VmDetails {
   created_at: string;
 }
 
-const ViewVmsPage: React.FC = () => {
+const ViewVmspage: React.FC = () => {
   const [vms, setVms] = useState<VmDetails[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -85,4 +85,4 @@ const ViewVmsPage: React.FC = () => {
   );
 };
 
-export default ViewVmsPage;
+export default ViewVmspage;

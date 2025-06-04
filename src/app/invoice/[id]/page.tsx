@@ -1,13 +1,21 @@
 import React from 'react';
 import PrintButton from '@/components/PrintButton';
+
 async function getInvoiceData(id: string) {
   const res = await fetch(`http://localhost:5000/api/invoice/${id}`, { cache: 'no-store' });
   if (!res.ok) throw new Error('Failed to fetch invoice data');
   return res.json();
 }
 
-export default async function InvoicePage({ params }: { params: { id: string } }) {
-  const invoiceData = await getInvoiceData(params.id);
+export default async function InvoicePage({ 
+  params 
+}: { 
+  params: Promise<{ id: string }> 
+}) {
+  // Await the params since they're now a Promise in Next.js 15
+  const { id } = await params;
+  const invoiceData = await getInvoiceData(id);
+  
   return (
     <div className="max-w-4xl mx-auto my-6 border border-black p-4">
       {/* Header */}
@@ -105,43 +113,39 @@ export default async function InvoicePage({ params }: { params: { id: string } }
         <p>GST No.: 07AAATE0202A2ZS</p>
       </div>
 
-
-
       <div className="flex border-b border-black text-xs">
-  {/* Left Side: Amount Chargeable & Declaration */}
-  <div className="w-3/5 border-r border-black p-2">
-    <p><span className="italic">Amount chargeable (in words)</span></p>
-    <p className="font-bold italic mt-1">
-      {invoiceData.amountInWords || 'Amount In Words Here'}
-    </p>
+        {/* Left Side: Amount Chargeable & Declaration */}
+        <div className="w-3/5 border-r border-black p-2">
+          <p><span className="italic">Amount chargeable (in words)</span></p>
+          <p className="font-bold italic mt-1">
+            {invoiceData.amountInWords || 'Amount In Words Here'}
+          </p>
 
-    <p className="mt-2">
-      ERNET India GST No. : <span className="font-bold italic">07AAATE0202A2ZS</span>
-    </p>
+          <p className="mt-2">
+            ERNET India GST No. : <span className="font-bold italic">07AAATE0202A2ZS</span>
+          </p>
 
-    <p className="mt-2 font-bold">Declaration</p>
-    <p className="italic">
-      All payments shall be made by Demand Draft/NEFT/RTGS only drawn in favour of ERNET India,
-      payable at New Delhi and sent to Finance Officer, ERNET India, 5th floor, Block-1, A-wing,
-      DMRC IT park, Shastri Park, Delhi - 110053. / Tel:011-22170641.<br />
-      Email: cfo@ernet.in, webhosting@ernet.in
-    </p>
-  </div>
+          <p className="mt-2 font-bold">Declaration</p>
+          <p className="italic">
+            All payments shall be made by Demand Draft/NEFT/RTGS only drawn in favour of ERNET India,
+            payable at New Delhi and sent to Finance Officer, ERNET India, 5th floor, Block-1, A-wing,
+            DMRC IT park, Shastri Park, Delhi - 110053. / Tel:011-22170641.<br />
+            Email: cfo@ernet.in, webhosting@ernet.in
+          </p>
+        </div>
 
-  {/* Right Side: Bank Details */}
-  <div className="w-2/5 p-2">
-    <p className="font-bold italic">ERNET India's Bank Details</p>
-    <p className="italic mt-1">
-      Bank Name : <span className="font-bold">STATE BANK OF INDIA</span><br />
-      A/c No. : <span className="font-bold">33892412527</span><br />
-      Branch & IFSC Code : <span className="font-bold">Kashmere Gate & SBIN0005715</span><br />
-      MICR code: <span className="font-bold">110002051</span><br />
-      Branch code: <span className="font-bold">005715</span>
-    </p>
-  </div>
-</div>
-
-
+        {/* Right Side: Bank Details */}
+        <div className="w-2/5 p-2">
+          <p className="font-bold italic">ERNET India's Bank Details</p>
+          <p className="italic mt-1">
+            Bank Name : <span className="font-bold">STATE BANK OF INDIA</span><br />
+            A/c No. : <span className="font-bold">33892412527</span><br />
+            Branch & IFSC Code : <span className="font-bold">Kashmere Gate & SBIN0005715</span><br />
+            MICR code: <span className="font-bold">110002051</span><br />
+            Branch code: <span className="font-bold">005715</span>
+          </p>
+        </div>
+      </div>
 
       <div className="text-center mt-4">
         <PrintButton />

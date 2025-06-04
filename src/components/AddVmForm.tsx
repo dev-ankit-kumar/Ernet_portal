@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import * as XLSX from 'xlsx';
 
 
-const AddVmDetailsPage: React.FC = () => {
+const AddVmDetailspage: React.FC = () => {
   const [formData, setFormData] = useState({
     hostname: '',
     core: '',
@@ -216,4 +216,4 @@ const AddVmDetailsPage: React.FC = () => {
   );
 };
 
-export default AddVmDetailsPage;
+export default AddVmDetailspage;

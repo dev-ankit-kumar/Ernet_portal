@@ -9,7 +9,7 @@ interface FormData {
   email: string;
 }
 
-export default function RegisterPage() {
+export default function Registerpage() {
   const [formData, setFormData] = useState<FormData>({
     username: '',
     email: '',

@@ -5,29 +5,54 @@ const db = require('../db/db');
 function addUser(req, res) {
   const {
     username,
+    phoneNo,
+    email,
     state,
     serviceType,
     plan,
-    additionalResources,
+    gstin,
+    tan,
+    address,
     totalAmount,
     discount,
     piDate,
     invoiceDate,
-    address,
-    gstin,
-    numVMs
+    activation_date,
+    deactivation_date,
+    additionalResources
   } = req.body;
+
+
+
+
+  const missingFields = [];
+if (!username) missingFields.push("username");
+if (!phoneNo) missingFields.push("phoneNo");
+if (!email) missingFields.push("email");
+if (!state) missingFields.push("state");
+if (!serviceType) missingFields.push("serviceType");
+if (!plan) missingFields.push("plan");
+if (!totalAmount) missingFields.push("totalAmount");
+if (!piDate) missingFields.push("piDate");
+if (!invoiceDate) missingFields.push("invoiceDate");
+if (!piDate) missingFields.push("activation_date");
+if (!invoiceDate) missingFields.push("deactivation_date");
+
+if (missingFields.length > 0) {
+  return res.status(400).json({ message: `Missing fields: ${missingFields.join(", ")}` });
+}
+
 
   // Validate required fields
   if (
-    !username || !state || !serviceType || !plan || !totalAmount ||
-    !piDate || !invoiceDate
+    !username || !phoneNo || !email || !state || !serviceType || !plan ||
+    !totalAmount || !piDate || !invoiceDate
   ) {
     return res.status(400).json({ message: 'Please fill all required fields.' });
   }
 
   // Check if username already exists
-  const checkQuery = 'SELECT * FROM users WHERE USERNAME = ?';
+  const checkQuery = 'SELECT * FROM users WHERE username = ?';
   db.query(checkQuery, [username], (checkErr, checkResults) => {
     if (checkErr) {
       console.error('Error checking existing username:', checkErr);
@@ -41,23 +66,27 @@ function addUser(req, res) {
     // Insert the new user
     const insertQuery = `
       INSERT INTO users 
-      (USERNAME, STATE, SERVICE_TYPE, PLAN, ADDITIONAL_RESOURCES, TOTAL_AMOUNT, DISCOUNT, PI_DATE, INVOICE_DATE, ADDRESS, GSTIN_UIN, NUM_VMS)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      (username, phone_no, email, state, service_type, plan, gstin_uin, tan_no, address, total_amount, discount, pi_date, invoice_date, activation_date, deactivation_date, additional_resources) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const values = [
       username,
+      phoneNo,
+      email,
       state,
       serviceType,
       plan,
-      additionalResources || '',
-      parseFloat(totalAmount),
+      gstin || '',
+      tan || '',
+      address || '',
+      parseFloat(totalAmount) || 0,
       parseFloat(discount) || 0,
       piDate,
       invoiceDate,
-      address || '',
-      gstin || '',
-      parseInt(numVMs, 10) || 0
+      activation_date || null,
+      deactivation_date || null,
+      additionalResources || ''
     ];
 
     db.query(insertQuery, values, (err, result) => {
@@ -66,7 +95,6 @@ function addUser(req, res) {
         return res.status(500).json({ message: 'Failed to insert user.' });
       }
 
-      // return the new record ID for redirecting to /invoice/:id
       return res.status(201).json({ message: 'User added successfully.', id: result.insertId });
     });
   });
@@ -106,18 +134,22 @@ function getInvoice(req, res) {
   const query = `
     SELECT
       id,
-      USERNAME       AS username,
-      STATE          AS state,
-      SERVICE_TYPE   AS serviceType,
-      PLAN           AS plan,
-      ADDITIONAL_RESOURCES AS additionalResources,
-      TOTAL_AMOUNT   AS totalAmount,
-      DISCOUNT       AS discount,
-      PI_DATE        AS piDate,
-      INVOICE_DATE   AS invoiceDate,
-      ADDRESS        AS address,
-      GSTIN_UIN      AS gstin,
-      NUM_VMS        AS numVMs
+      username,
+      phone_no         AS phoneNo,
+      email,
+      state,
+      service_type     AS serviceType,
+      plan,
+      gstin_uin        AS gstin,
+      tan_no           AS tan,
+      address,
+      total_amount     AS totalAmount,
+      discount,
+      pi_date          AS piDate,
+      invoice_date     AS invoiceDate,
+      activation_date  AS activation_date,
+      deactivation_date AS deactivation_date,
+      additional_resources AS additionalResources
     FROM users
     WHERE id = ?
   `;

@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import html2canvas from 'html2canvas';
 import { useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -13,6 +12,8 @@ import { useRouter } from 'next/navigation';
 
 interface FormData {
   username: string;
+  phoneNo: string;
+  email: string;
   state: string;
   serviceType: string;
   plan: string;
@@ -23,6 +24,9 @@ interface FormData {
   invoiceDate: string;
   address: string;
   gstin: string;
+  tan: string;
+  activation_date: string;
+  deactivation_date: string;
   numVMs: string;
 }
 
@@ -63,6 +67,8 @@ const SubscriptionForm: React.FC = () => {
 
   const [formData, setFormData] = useState<FormData>({
     username: '',
+    phoneNo: '',
+    email: '',
     state: '',
     serviceType: '',
     plan: '',
@@ -73,6 +79,9 @@ const SubscriptionForm: React.FC = () => {
     invoiceDate: '',
     address: '',
     gstin: '',
+    activation_date: '',
+    deactivation_date: '',
+    tan:'',
     numVMs: '',
   });
 
@@ -176,6 +185,14 @@ const SubscriptionForm: React.FC = () => {
             <label className={labelStyle}>Username</label>
             <input name="username" value={formData.username} onChange={handleChange} required className={inputStyle} />
           </div>
+          <div>
+            <label className={labelStyle}>Phone No.</label>
+            <input name="phoneNo" value={formData.phoneNo} onChange={handleChange} required className={inputStyle} />
+          </div>
+          <div>  
+            <label className={labelStyle}>Email</label>
+            <input name="email" value={formData.email} onChange={handleChange} required className={inputStyle} />
+          </div>
 
           <div>
             <label className={labelStyle}>State</label>
@@ -224,11 +241,15 @@ const SubscriptionForm: React.FC = () => {
           </div>
 
           <div>
-            <label className={labelStyle}>GSTIN / UIN</label>
+            <label className={labelStyle}>GST No.</label>
             <input name="gstin" value={formData.gstin} onChange={handleChange} className={inputStyle} />
           </div>
-
           <div>
+            <label className={labelStyle}>Tan No.</label>
+            <input name="tan" value={formData.tan} onChange={handleChange} className={inputStyle} />
+          </div>
+
+          {/* <div>
             <label className={labelStyle}>Number of VMs</label>
             <input
               name="numVMs"
@@ -238,7 +259,7 @@ const SubscriptionForm: React.FC = () => {
               className={inputStyle}
               placeholder="e.g. 5"
             />
-          </div>
+          </div> */}
         </div>
 
         {/* Section 3: Address & Financials */}
@@ -269,6 +290,20 @@ const SubscriptionForm: React.FC = () => {
           <div>
             <label className={labelStyle}>Invoice Date</label>
             <input name="invoiceDate" type="date" value={formData.invoiceDate} onChange={handleChange} required className={inputStyle} />
+          </div>
+        </div>
+
+
+        {/* Section 5: activation dates */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className={labelStyle}>Activation Date</label>
+            <input name="activation_date" type="date" value={formData.activation_date} onChange={handleChange} required className={inputStyle} />
+          </div>
+
+          <div>
+            <label className={labelStyle}>Deactivation Date</label>
+            <input name="deactivation_date" type="date" value={formData.deactivation_date} onChange={handleChange} required className={inputStyle} />
           </div>
         </div>
 

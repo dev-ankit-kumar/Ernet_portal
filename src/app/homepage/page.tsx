@@ -1,19 +1,22 @@
-"use client";
+// src/app/homepage/page.tsx
+'use client';
 
-import React from "react";
-import { Bell, User, Users, Database, HardDrive, LogOut } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
-import Homepage from "@/components/Homepage";
-import withAuth from "@/components/withAuth";
+import React from 'react';
+import HomepageComponent from '@/components/Homepage';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
-function HomePage(){
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <Homepage/>
-    </div>
-  );
+const Page = () => {
+  const router = useRouter();
+
+  useEffect(() => {
+    const isAuthenticated = typeof window !== 'undefined' && localStorage.getItem('token');
+    if (!isAuthenticated) {
+      router.push('/login');
+    }
+  }, [router]);
+
+  return <HomepageComponent />;
 };
 
-export default withAuth(HomePage);
+export default Page;

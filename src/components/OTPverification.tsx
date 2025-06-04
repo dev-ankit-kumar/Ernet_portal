@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-const OTPVerificationPage: React.FC = () => {
+const OTPVerificationpage: React.FC = () => {
   const router = useRouter();
   const [otp, setOtp] = useState('');
   const [phone, setPhone] = useState('');
@@ -114,4 +114,4 @@ const OTPVerificationPage: React.FC = () => {
   );
 };
 
-export default OTPVerificationPage;
+export default OTPVerificationpage;

@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-const LoginPage: React.FC = () => {
+const Loginpage: React.FC = () => {
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
   const [message, setMessage] = useState('');
@@ -79,4 +79,4 @@ const LoginPage: React.FC = () => {
   );
 };
 
-export default LoginPage;
+export default Loginpage;

@@ -2,11 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { Bell, User, Users, Database, HardDrive, LogOut ,UserPlus ,Globe} from 'lucide-react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
-const HomePage: React.FC = () => {
+const Homepage: React.FC = () => {
   const [phone, setPhone] = useState<string | null>(null);
   const [userCount, setUserCount] = useState<number | null>(null);
   const [vmCount, setVmCount] = useState<number | null>(null);
@@ -110,7 +109,8 @@ const HomePage: React.FC = () => {
               </button>
               <div className="ml-3 relative flex items-center">
                 <div className="flex items-center px-3 py-2 rounded-md hover:bg-gray-100">
-                  <img
+                  <Image
+                    width={32}
                     className="h-8 w-8 rounded-full bg-gray-300"
                     src="/api/placeholder/32/32"
                     alt="User avatar"
@@ -219,4 +219,4 @@ const HomePage: React.FC = () => {
   );
 };
 
-export default HomePage;
+export default Homepage;
