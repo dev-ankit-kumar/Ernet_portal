@@ -111,6 +111,7 @@ const Homepage: React.FC = () => {
                 <div className="flex items-center px-3 py-2 rounded-md hover:bg-gray-100">
                   <Image
                     width={32}
+                    height={32}
                     className="h-8 w-8 rounded-full bg-gray-300"
                     src="/api/placeholder/32/32"
                     alt="User avatar"

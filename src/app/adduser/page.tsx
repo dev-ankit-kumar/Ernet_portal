@@ -6,7 +6,7 @@ import withAuth from '@/components/withAuth'
 
 const ProtectedAddUserForm = withAuth(AddUserForm)
 
-const page = () => {
+const Page = () => {
   return (
     <div>
       <ProtectedAddUserForm />
@@ -14,4 +14,4 @@ const page = () => {
   )
 }
 
-export default page
+export default Page
